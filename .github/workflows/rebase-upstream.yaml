@@ -1,0 +1,80 @@
+name: Rebase Fork on Upstream
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_rebase:
+        description: 'Type "REBASE" to confirm you want to rebase on upstream'
+        required: true
+        default: ""
+
+jobs:
+  rebase-on-upstream:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dtx' || github.actor == 'Niopub'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Validate confirmation
+        if: github.event.inputs.confirm_rebase != 'REBASE'
+        run: |
+          echo "❌ Rebase not confirmed. Please type 'REBASE' in the confirmation input."
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/docker/mcp-registry.git || true
+          git remote -v
+
+      - name: Fetch all branches and tags
+        run: |
+          git fetch origin
+          git fetch upstream
+
+      - name: Show current status
+        run: |
+          echo "Current branch:"
+          git branch -v
+          echo ""
+          echo "Recent commits on current branch:"
+          git log --oneline -10
+          echo ""
+          echo "Recent commits on upstream/main:"
+          git log --oneline -10 upstream/main
+
+      - name: Rebase on upstream main
+        run: |
+          echo "Starting rebase of main branch onto upstream/main..."
+          git checkout main
+          git rebase upstream/main
+
+      - name: Show rebase result
+        run: |
+          echo "Rebase completed. New commit history:"
+          git log --oneline -10
+          echo ""
+          echo "Commits that will be pushed:"
+          git log --oneline upstream/main..HEAD
+
+      - name: Force push rebased changes
+        run: |
+          echo "Force pushing rebased changes to origin/main..."
+          git push --force-with-lease origin main
+
+      - name: Summary
+        run: |
+          echo "✅ Successfully rebased fork on upstream main"
+          echo "Your local commits have been rebased on top of the latest upstream changes"
+          echo "Changes have been force-pushed to your fork"

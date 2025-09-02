@@ -348,3 +348,13 @@ If you have questions, please create an issue in the repository.
 ## 📄 License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
+
+## Niopub specific steps
+
+For Niopub we only create, build and push the docker image along with the server.yaml spec. No need to do the catalog stuff.
+
+```
+task create -- --category ai https://github.com/Niopub/openai_image_gen_edit -e OPENAI_API_KEY=sk-xxx-qPxDJxxxxxx
+task build -- openai_image_gen_edit
+task push -- openai_image_gen_edit
+```

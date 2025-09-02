@@ -1,0 +1,83 @@
+name: Upload Source Code to GCP
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # Every 6 hours
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload_to_gcp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for GCP credentials
+        run: |
+          if [ -z "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" ]; then
+            echo "❌ GCP_SERVICE_ACCOUNT_KEY secret is not set"
+            echo "Please add the GCP service account key as a repository secret"
+            exit 1
+          else
+            echo "✅ GCP credentials found"
+          fi
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          create_credentials_file: true
+          export_environment_variables: true
+        # Alternative: Use Workload Identity Federation (more secure)
+        # with:
+        #   workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        #   service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Debug Authentication
+        run: |
+          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+          gcloud config set project dap-network
+          gsutil ls gs://niopub_studio/
+
+      - name: Create source code archive
+        run: |
+          # Create timestamp for unique filename
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+
+          # Create zip file name
+          ZIP_NAME="mcp-registry-source_${TIMESTAMP}_${COMMIT_SHA}.zip"
+
+          # Create zip file excluding unnecessary files
+          zip -r "$ZIP_NAME" . \
+            -x "*.git*" \
+            -x "dump.rdb" \
+            -x "*.log" \
+            -x "tmp/*" \
+            -x "*.tmp"
+
+          echo "Created archive: $ZIP_NAME"
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Upload to GCP
+        run: |
+          # Set GCP project
+          gcloud config set project dap-network
+
+          # Upload source code archive to GCP bucket
+          echo "Uploading: $ZIP_NAME"
+          gsutil cp "$ZIP_NAME" gs://niopub_studio/mcp-registry/$ZIP_NAME
+
+          # Also upload as latest
+          gsutil cp "$ZIP_NAME" gs://niopub_studio/mcp-registry/latest.zip
+
+          echo "Successfully uploaded source archive to GCP bucket"

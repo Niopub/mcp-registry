@@ -52,15 +52,15 @@ func run(ctx context.Context, name string, listTools bool, pullCommunity bool) e
 		return nil
 	}
 
-	isMcpImage := strings.HasPrefix(server.Image, "mcp/")
+	isNiopubImage := strings.HasPrefix(server.Image, "niopub/")
 
-	if isMcpImage {
-		if err := buildMcpImage(ctx, server); err != nil {
+	if isNiopubImage {
+		if err := buildNiopubImage(ctx, server); err != nil {
 			return err
 		}
 	} else {
 		if !pullCommunity {
-			return fmt.Errorf("server is not docker built (ie, in the 'mcp/' namespace), you must either build it yourself or pull it with `docker pull %s` if you want to use it", server.Image)
+			return fmt.Errorf("server is not docker built (ie, in the 'niopub/' namespace), you must either build it yourself or pull it with `docker pull %s` if you want to use it", server.Image)
 		}
 		if err := pullCommunityImage(ctx, server); err != nil {
 			return err
@@ -93,7 +93,7 @@ func run(ctx context.Context, name string, listTools bool, pullCommunity bool) e
 	}
 	fmt.Printf("\n-----------------------------------------\n\n")
 
-	if isMcpImage {
+	if isNiopubImage {
 		fmt.Println("✅ Image built as", server.Image)
 	} else {
 		fmt.Println("✅ Image pulled as", server.Image)
@@ -103,7 +103,8 @@ func run(ctx context.Context, name string, listTools bool, pullCommunity bool) e
 }
 
 func buildDockerEnv(additionalEnv ...string) []string {
-	env := []string{"PATH=" + os.Getenv("PATH")}
+	env := os.Environ()
+	// env := []string{"PATH=" + os.Getenv("PATH")}
 
 	// On Windows, Docker also needs ProgramW6432
 	// See https://github.com/docker/mcp-registry/issues/79 for more details
@@ -115,7 +116,7 @@ func buildDockerEnv(additionalEnv ...string) []string {
 	return append(env, additionalEnv...)
 }
 
-func buildMcpImage(ctx context.Context, server servers.Server) error {
+func buildNiopubImage(ctx context.Context, server servers.Server) error {
 	commit := server.Source.Commit
 	if commit == "" {
 		return fmt.Errorf("local server %s must specify source.commit before building", server.Name)
