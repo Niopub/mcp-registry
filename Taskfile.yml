@@ -32,6 +32,10 @@ tasks:
   ci:
     desc: Run CI helper utilities
     cmd: go run ./cmd/ci {{.CLI_ARGS}}
+  push:
+    desc: Push a server image to the repository
+    cmds:
+      - docker push niopub/{{.CLI_ARGS}}
 
   import:
     desc: Import a server into the registry

@@ -1,0 +1,29 @@
+name: openai-image-gen-edit
+image: niopub/openai-image-gen-edit
+type: server
+meta:
+  category: ai
+  tags:
+    - image-edit
+    - openai
+    - image-generation
+about:
+  title: OpenAI Powered Image Generation
+  description: Update or generate images using OpenAI models.
+  icon: https://avatars.githubusercontent.com/u/200037949?v=4
+source:
+  project: https://github.com/Niopub/openai-image-gen-edit
+  upstream: https://github.com/ai-zerolab/mcp-openai-image-generation
+config:
+  description: API key for your OpenAI / Together.AI requests
+  secrets:
+    - name: openai-image-gen-edit.together_api_key
+      env: TOGETHER_API_KEY
+      example: <TOGETHER_API_KEY>
+  env:
+    - name: TOGETHER_TEXT2IMAGE_MODEL_ID
+      example: HiDream-ai/HiDream-I1-Dev
+    - name: TOGETHER_IMAGE2IMAGE_MODEL_ID
+      example: black-forest-labs/FLUX.1-kontext-dev
+    - name: TOGETHER_IMAGE2TEXT_MODEL_ID
+      example: google/gemma-3n-E4B-it

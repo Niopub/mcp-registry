@@ -113,7 +113,7 @@ func run(ctx context.Context, buildURL, name, category, userProvidedImage string
 		name = strings.ToLower(guessedName)
 	}
 
-	tag := "mcp/" + name
+	tag := "niopub/" + name
 	if userProvidedImage != "" {
 		tag = userProvidedImage
 	}
@@ -138,10 +138,10 @@ func run(ctx context.Context, buildURL, name, category, userProvidedImage string
 
 		if token != "" {
 			cmd = exec.CommandContext(ctx, "docker", "buildx", "build", "--secret", "id=GIT_AUTH_TOKEN", "-t", "check", "-t", tag, "--label", "org.opencontainers.image.revision="+sha, "--load", gitURL)
-			cmd.Env = []string{"GIT_AUTH_TOKEN=" + token, "PATH=" + os.Getenv("PATH")}
+			cmd.Env = append(os.Environ(), "GIT_AUTH_TOKEN="+token)
 		} else {
 			cmd = exec.CommandContext(ctx, "docker", "buildx", "build", "-t", "check", "-t", tag, "--label", "org.opencontainers.image.revision="+sha, "--load", gitURL)
-			cmd.Env = []string{"PATH=" + os.Getenv("PATH")}
+			cmd.Env = os.Environ()
 		}
 
 		cmd.Dir = os.TempDir()
