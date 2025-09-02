@@ -137,7 +137,7 @@ func ToTile(ctx context.Context, server servers.Server) (Tile, error) {
 
 	pullCount := 0
 	starCount := 0
-	if strings.HasPrefix(image, "mcp/") {
+	if strings.HasPrefix(image, "niopub/") {
 		repoInfo, err := hub.GetRepositoryInfo(ctx, server.Image)
 		if err != nil {
 			return Tile{}, err

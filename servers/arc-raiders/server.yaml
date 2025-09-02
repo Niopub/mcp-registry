@@ -1,0 +1,17 @@
+name: arc-raiders
+image: niopub/arc-raiders-mcp-server
+type: server
+meta:
+  category: gaming
+  tags:
+    - gaming
+    - arc-raiders
+    - game-data
+    - api
+about:
+  title: ARC Raiders MCP Server
+  description: MCP Server for ARC Raiders game data from the MetaForge API. Provides access to items, quests, traders, ARCs, and map data with automatic 1-hour response caching.
+  icon: https://avatars.githubusercontent.com/u/200037949?v=4
+source:
+  project: https://github.com/Niopub/arc-raiders-mcp-server
+
