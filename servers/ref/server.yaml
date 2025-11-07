@@ -12,7 +12,7 @@ about:
     icon: https://avatars.githubusercontent.com/u/210568548?v=4
 source:
     project: https://github.com/ref-tools/ref-tools-mcp
-    commit: ead8aa898957be338908e9d80064b035530ee674
+    commit: 09f86e87926bd08fba44c6ea89480f3f73a7c841
 config:
     description: Configure the connection to Ref
     secrets:
